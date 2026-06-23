@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SKYA Content Studio</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0A0A0F;
+  --surface: #111118;
+  --surface2: #1A1A24;
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.15);
+  --accent: #6C5CE7;
+  --accent2: #00CEC9;
+  --text: #F0EFF8;
+  --text2: #8B8A9B;
+  --text3: #55546A;
+  --success: #00B894;
+  --warning: #FDCB6E;
+  --danger: #FF7675;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.header {
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  background: rgba(10,10,15,0.92);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+
+.logo-mark {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: white; flex-shrink: 0;
+}
+
+.header-logo-text { font-size: 14px; font-weight: 600; letter-spacing: -0.02em; }
+.header-logo-sub { font-size: 11px; color: var(--text2); }
+
+.header-badge {
+  margin-left: auto;
+  font-size: 11px; padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(108,92,231,0.15);
+  color: #A29BFE;
+  border: 1px solid rgba(108,92,231,0.25);
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: calc(100vh - 57px);
+}
+
+.sidebar {
+  border-right: 1px solid var(--border);
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.section-title {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; color: var(--text3);
+  text-transform: uppercase; margin-bottom: 8px;
+}
+
+.field-group { margin-bottom: 16px; }
+
+.field-label {
+  font-size: 12px; color: var(--text2);
+  margin-bottom: 6px; display: block;
+}
+
+select, textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px; color: var(--text);
+  font-family: inherit;
+  transition: border-color 0.15s;
+  outline: none; -webkit-appearance: none;
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238B8A9B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px; cursor: pointer;
+}
+
+select:focus, textarea:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 72px; }
+
+.platform-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px; margin-bottom: 16px;
+}
+
+.platform-toggle {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 9px;
+  border: 1px solid var(--border); border-radius: 8px;
+  cursor: pointer; font-size: 12px; color: var(--text2);
+  background: var(--surface2); transition: all 0.15s; user-select: none;
+}
+
+.platform-toggle:hover { border-color: var(--border-hover); color: var(--text); }
+.platform-toggle.on { border-color: var(--accent); background: rgba(108,92,231,0.1); color: var(--text); }
+.platform-toggle .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+.platform-toggle.on .dot { background: var(--accent); }
+
+.idea-chips { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+
+.idea-chip {
+  padding: 7px 10px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: 12px; color: var(--text2);
+  background: transparent; cursor: pointer;
+  text-align: left; transition: all 0.15s;
+  line-height: 1.4; font-family: inherit;
+}
+
+.idea-chip:hover { border-color: var(--accent); color: var(--text); background: rgba(108,92,231,0.08); }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+.btn-generate {
+  width: 100%; padding: 11px;
+  background: var(--accent); color: white;
+  border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+  font-family: inherit; position: relative;
+}
+
+.btn-generate:hover { opacity: 0.88; }
+.btn-generate:active { transform: scale(0.98); }
+.btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-generate.loading { color: transparent; }
+.btn-generate.loading::after {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white; border-radius: 50%;
+  margin: -8px 0 0 -8px;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.results { padding: 24px; overflow-y: auto; }
+
+.empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%; min-height: 400px;
+  color: var(--text3); text-align: center; gap: 10px;
+}
+
+.empty-icon {
+  width: 48px; height: 48px;
+  border: 1px solid var(--border); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 4px;
+}
+
+.empty-state h3 { font-size: 15px; font-weight: 500; color: var(--text2); }
+.empty-state p { font-size: 13px; max-width: 280px; line-height: 1.6; }
+
+/* Error banner */
+.error-banner {
+  display: none;
+  background: rgba(255,118,117,0.1);
+  border: 1px solid rgba(255,118,117,0.3);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--danger);
+  line-height: 1.6;
+}
+
+.error-banner strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+.results-header {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 14px;
+}
+
+.results-label { font-size: 13px; color: var(--text2); }
+
+.copy-all-btn {
+  font-size: 11px; padding: 5px 12px;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: transparent; color: var(--text2);
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+
+.copy-all-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.results-grid { display: grid; gap: 12px; }
+
+.result-card {
+  background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; transition: border-color 0.15s;
+}
+
+.result-card:hover { border-color: var(--border-hover); }
+
+.card-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+}
+
+.card-platform { display: flex; align-items: center; gap: 8px; }
+
+.platform-icon {
+  width: 22px; height: 22px; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0;
+}
+
+.platform-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.card-actions { display: flex; gap: 6px; align-items: center; }
+
+.char-badge {
+  font-size: 10px; color: var(--text3);
+  padding: 2px 8px; background: var(--surface2); border-radius: 20px;
+}
+
+.char-badge.warn { color: var(--warning); }
+
+.copy-btn {
+  font-size: 11px; padding: 3px 10px;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: transparent; color: var(--text2);
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+
+.copy-btn:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface2); }
+.copy-btn.copied { border-color: var(--success); color: var(--success); }
+
+.card-body {
+  padding: 12px 14px; font-size: 13px; color: var(--text);
+  line-height: 1.7; white-space: pre-wrap; word-break: break-word;
+}
+
+.icon-li { background: rgba(10,102,194,0.2); color: #5BA4EF; }
+.icon-ig { background: rgba(193,53,132,0.2); color: #E1306C; }
+.icon-fb { background: rgba(24,119,242,0.2); color: #4A90D9; }
+.icon-x  { background: rgba(255,255,255,0.08); color: var(--text); }
+.icon-yt { background: rgba(255,0,0,0.15); color: #FF4444; }
+.icon-pt { background: rgba(230,0,35,0.15); color: #E60023; }
+.icon-sc { background: rgba(255,252,0,0.12); color: #FFFC00; }
+
+@media (max-width: 768px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  .results { padding: 16px; }
+  .header { padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo-mark">S</div>
+  <div>
+    <div class="header-logo-text">SKYA Content Studio</div>
+    <div class="header-logo-sub">skya.one</div>
+  </div>
+  <div class="header-badge">Powered by Claude AI</div>
+</header>
+
+<div class="main">
+  <aside class="sidebar">
+
+    <div class="field-group">
+      <div class="section-title">Content settings</div>
+      <div class="field-label">Category</div>
+      <select id="category">
+        <option value="hype">Hype / launch announcement</option>
+        <option value="feature">Feature spotlight</option>
+        <option value="pain">Pain point</option>
+        <option value="problem">Problem-solving</option>
+        <option value="stat">Data / stat post</option>
+        <option value="edu">Educational explainer</option>
+        <option value="social">Social proof / result</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Target audience</div>
+      <select id="audience">
+        <option value="agency">Digital agencies</option>
+        <option value="seo">SEO professionals</option>
+        <option value="brand">Brand owners</option>
+        <option value="startup">Startup founders</option>
+        <option value="marketer">Marketers</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Tone</div>
+      <select id="tone">
+        <option value="bold">Bold & direct</option>
+        <option value="educational">Educational</option>
+        <option value="conversational">Conversational</option>
+        <option value="urgent">Urgency-driven</option>
+        <option value="storytelling">Storytelling</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Topic or angle <span style="color:var(--text3)">(optional)</span></div>
+      <textarea id="topic" placeholder="e.g. hallucination audit, competitor citation tracking, 14-day free trial…"></textarea>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-title" style="margin-bottom:8px">Platforms</div>
+    <div class="platform-grid" id="platformGrid"></div>
+
+    <hr class="divider">
+
+    <div class="section-title" style="margin-bottom:8px">Quick idea starters</div>
+    <div class="idea-chips" id="ideaChips"></div>
+
+    <button class="btn-generate" id="generateBtn" onclick="generate()">Generate captions</button>
+
+  </aside>
+
+  <main class="results">
+    <div id="errorBanner" class="error-banner"></div>
+
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">✦</div>
+      <h3>Ready to generate</h3>
+      <p>Pick your settings on the left and hit Generate. Claude will write platform-ready captions for every channel.</p>
+    </div>
+
+    <div id="resultsArea" style="display:none">
+      <div class="results-header">
+        <div class="results-label" id="resultsLabel"></div>
+        <button class="copy-all-btn" onclick="copyAll()">Copy all as text</button>
+      </div>
+      <div class="results-grid" id="cardsGrid"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// REPLACE THE VALUE BELOW WITH YOUR ANTHROPIC API KEY
+// Get it free at: https://console.anthropic.com → API Keys
+// ---------------------------------------------------------------
+const API_KEY = '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';
+// ---------------------------------------------------------------
+
+const PLATFORMS = [
+  { id:'linkedin',  label:'LinkedIn',    icon:'in', cls:'icon-li' },
+  { id:'instagram', label:'Instagram',   icon:'ig', cls:'icon-ig' },
+  { id:'facebook',  label:'Facebook',    icon:'fb', cls:'icon-fb' },
+  { id:'x',         label:'X / Twitter', icon:'X',  cls:'icon-x'  },
+  { id:'youtube',   label:'YouTube',     icon:'yt', cls:'icon-yt' },
+  { id:'pinterest', label:'Pinterest',   icon:'pt', cls:'icon-pt' },
+  { id:'snapchat',  label:'Snapchat',    icon:'sc', cls:'icon-sc' },
+];
+
+const IDEAS = [
+  'ChatGPT is wrong about your brand right now',
+  'Which competitors is AI recommending instead of you?',
+  '9 AI platforms, 9 different brand stories',
+  'Most tools diagnose. SKYA writes the prescription.',
+  'Your brand has an AI presence you cannot see',
+  'Hallucination audit: find what AI gets wrong',
+  'AI search is replacing Google — are you visible?',
+  'Track your brand across ChatGPT, Gemini & Perplexity',
+];
+
+const enabled = new Set(PLATFORMS.map(p => p.id));
+
+// Build platform toggles
+const pgrid = document.getElementById('platformGrid');
+PLATFORMS.forEach(p => {
+  const el = document.createElement('div');
+  el.className = 'platform-toggle on';
+  el.innerHTML = `<span class="dot"></span><span>${p.label}</span>`;
+  el.onclick = () => {
+    if (enabled.has(p.id)) { enabled.delete(p.id); el.classList.remove('on'); }
+    else { enabled.add(p.id); el.classList.add('on'); }
+  };
+  pgrid.appendChild(el);
+});
+
+// Build idea chips
+IDEAS.forEach(idea => {
+  const btn = document.createElement('button');
+  btn.className = 'idea-chip';
+  btn.textContent = idea;
+  btn.onclick = () => { document.getElementById('topic').value = idea; };
+  document.getElementById('ideaChips').appendChild(btn);
+});
+
+function showError(title, detail) {
+  const banner = document.getElementById('errorBanner');
+  banner.innerHTML = `<strong>${title}</strong>${detail}`;
+  banner.style.display = 'block';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsArea').style.display = 'none';
+}
+
+function hideError() {
+  document.getElementById('errorBanner').style.display = 'none';
+}
+
+function copyText(id, btn) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+function copyAll() {
+  const parts = [];
+  PLATFORMS.forEach(p => {
+    const el = document.getElementById('body-' + p.id);
+    if (el) parts.push(`=== ${p.label.toUpperCase()} ===\n${el.textContent}\n`);
+  });
+  navigator.clipboard.writeText(parts.join('\n'));
+}
+
+async function generate() {
+  // Check API key is set
+  if (!API_KEY || API_KEY === 'PASTE_YOUR_KEY_HERE' || !API_KEY.startsWith('sk-ant-')) {
+    showError('API key not configured', 'Open the index.html file in a text editor and replace PASTE_YOUR_KEY_HERE with your Anthropic API key from console.anthropic.com');
+    return;
+  }
+
+  if (enabled.size === 0) {
+    showError('No platforms selected', 'Please turn on at least one platform using the toggles on the left.');
+    return;
+  }
+
+  hideError();
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true; btn.classList.add('loading'); btn.textContent = '';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsArea').style.display = 'none';
+
+  const catVal = document.getElementById('category').value;
+  const audVal = document.getElementById('audience').value;
+  const tonVal = document.getElementById('tone').value;
+  const topic  = document.getElementById('topic').value.trim();
+
+  const PLAYBOOK = `SKYA (skya.one) is the first AI Visibility Intelligence platform. It reveals what ChatGPT, Gemini, Perplexity, Claude, and Google AIO are saying about any brand in real time. It runs 6 specialized agents: LLM Visibility, SERP Feature Hunter, On-Page, Schema, Backlink, Competitor, and Keyword agents. Key features: Hallucination Audit (catches wrong brand info in AI), Competitor Citation Intelligence (sees which rivals AI recommends over you), Multi-Platform Tracking (9 AI platforms at once), branded PDF reports for agencies. 14-day free trial, no card required. Core message: "Most AI visibility tools only diagnose. SKYA writes the prescription." Key hooks: "Now you can see exactly what AI is saying about any brand — in real time." "Your brand has an AI presence. You just can't see it."`;
+
+  const platformList = PLATFORMS.filter(p => enabled.has(p.id));
+  const pIds = platformList.map(p => p.id).join(', ');
+
+  const catMap = { hype:'hype/launch announcement', feature:'feature spotlight', pain:'pain point', problem:'problem-solving', stat:'data/stat post', edu:'educational explainer', social:'social proof/result' };
+  const audMap = { agency:'digital marketing agencies', seo:'SEO professionals', brand:'brand owners', startup:'startup founders', marketer:'marketers' };
+  const tonMap = { bold:'bold and direct', educational:'educational and informative', conversational:'conversational and relatable', urgent:'urgency-driven', storytelling:'storytelling-based' };
+
+  const prompt = `You are a social media content expert for SKYA.
+
+ABOUT SKYA: ${PLAYBOOK}
+
+Write social media captions for these platforms only: ${pIds}
+Category: ${catMap[catVal]}
+Audience: ${audMap[audVal]}
+Tone: ${tonMap[tonVal]}
+${topic ? 'Angle: ' + topic : 'Use the strongest angle from the playbook.'}
+
+Platform-specific rules:
+- linkedin: 200-300 words, professional thought-leadership, end with question or CTA
+- instagram: 80-130 words, punchy, visual-first, 6-8 hashtags at the end
+- facebook: 120-180 words, conversational, community-focused
+- x: MAXIMUM 260 characters total, one punchy hook, no hashtags
+- youtube: 150-200 words, SEO-optimised video description, embed keywords naturally, end with skya.one
+- pinterest: 60-90 words, benefit-focused, keyword-rich, 3-4 hashtags
+- snapchat: 40-55 words max, casual, youthful energy, 1-2 emojis OK
+
+IMPORTANT: Return ONLY a valid JSON object. No markdown fences. No backticks. No explanation before or after. Just the raw JSON.
+Only include keys for the platforms listed above.
+Example format: {"linkedin": "caption here", "instagram": "caption here"}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    // Handle HTTP errors
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const msg = errData.error?.message || `HTTP ${res.status}`;
+      if (res.status === 401) {
+        showError('Invalid API key', 'Your Anthropic API key was rejected. Double-check it at console.anthropic.com → API Keys and update the key in index.html.');
+      } else if (res.status === 429) {
+        showError('Rate limit hit', 'Too many requests. Wait a moment and try again.');
+      } else {
+        showError('API error', msg);
+      }
+      return;
+    }
+
+    const data = await res.json();
+
+    // Safely extract text
+    if (!data.content || !Array.isArray(data.content) || data.content.length === 0) {
+      showError('Empty response', 'Claude returned an empty response. Please try again.');
+      return;
+    }
+
+    const raw = data.content
+      .filter(b => b.type === 'text')
+      .map(b => b.text)
+      .join('');
+
+    if (!raw.trim()) {
+      showError('Empty response', 'Claude returned no text. Please try again.');
+      return;
+    }
+
+    // Parse JSON — strip any accidental markdown fences
+    let parsed;
+    try {
+      const clean = raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+      parsed = JSON.parse(clean);
+    } catch(parseErr) {
+      showError('Parsing error', 'Claude returned unexpected formatting. Please try again. If this keeps happening, try a simpler topic angle.');
+      console.error('Raw response:', raw);
+      return;
+    }
+
+    // Render cards
+    const cardsGrid = document.getElementById('cardsGrid');
+    cardsGrid.innerHTML = '';
+    let count = 0;
+
+    platformList.forEach(p => {
+      const text = parsed[p.id];
+      if (!text || typeof text !== 'string') return;
+      count++;
+
+      const charWarn = p.id === 'x' && text.length > 280;
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-platform">
+            <div class="platform-icon ${p.cls}">${p.icon}</div>
+            <span class="platform-name">${p.label}</span>
+          </div>
+          <div class="card-actions">
+            <span class="char-badge ${charWarn ? 'warn' : ''}">${text.length} chars${charWarn ? ' ⚠' : ''}</span>
+            <button class="copy-btn" onclick="copyText('body-${p.id}', this)">Copy</button>
+          </div>
+        </div>
+        <div class="card-body" id="body-${p.id}">${text}</div>`;
+      cardsGrid.appendChild(card);
+    });
+
+    if (count === 0) {
+      showError('No captions generated', 'Claude did not return captions for the selected platforms. Please try again.');
+      return;
+    }
+
+    const catEl = document.getElementById('category');
+    document.getElementById('resultsLabel').textContent = `${count} caption${count>1?'s':''} generated · ${catEl.options[catEl.selectedIndex].text}`;
+    document.getElementById('resultsArea').style.display = 'block';
+
+  } catch(e) {
+    showError('Connection error', 'Could not reach the Claude API. Check your internet connection and try again.');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = 'Generate captions';
+  }
+}
+</script>
+</body>
+</html>
