@@ -457,8 +457,8 @@ function copyAll() {
 
 async function generate() {
   // Check API key is set
-  if (!API_KEY || API_KEY === 'PASTE_YOUR_KEY_HERE' || !API_KEY.startsWith('sk-ant-')) {
-    showError('API key not configured', 'Open the index.html file in a text editor and replace PASTE_YOUR_KEY_HERE with your Anthropic API key from console.anthropic.com');
+  if (!API_KEY || API_KEY === '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' || !API_KEY.startsWith('sk-ant-')) {
+    showError('API key not configured', 'Open the index.html file in a text editor and replace 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 with your Anthropic API key from console.anthropic.com');
     return;
   }
 
